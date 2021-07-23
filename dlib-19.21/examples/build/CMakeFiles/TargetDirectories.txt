@@ -1,0 +1,17 @@
+/mnt/docker/remote_machine_utils/dlib-19.21/examples/build/CMakeFiles/dnn_inception_ex.dir
+/mnt/docker/remote_machine_utils/dlib-19.21/examples/build/CMakeFiles/dnn_semantic_segmentation_train_ex.dir
+/mnt/docker/remote_machine_utils/dlib-19.21/examples/build/CMakeFiles/dnn_metric_learning_ex.dir
+/mnt/docker/remote_machine_utils/dlib-19.21/examples/build/CMakeFiles/least_squares_ex.dir
+/mnt/docker/remote_machine_utils/dlib-19.21/examples/build/CMakeFiles/dnn_introduction_ex.dir
+/mnt/docker/remote_machine_utils/dlib-19.21/examples/build/CMakeFiles/dnn_mmod_train_find_cars_ex.dir
+/mnt/docker/remote_machine_utils/dlib-19.21/examples/build/CMakeFiles/dnn_introduction3_ex.dir
+/mnt/docker/remote_machine_utils/dlib-19.21/examples/build/CMakeFiles/assignment_learning_ex.dir
+/mnt/docker/remote_machine_utils/dlib-19.21/examples/build/CMakeFiles/dnn_introduction2_ex.dir
+/mnt/docker/remote_machine_utils/dlib-19.21/examples/build/CMakeFiles/dnn_instance_segmentation_train_ex.dir
+/mnt/docker/remote_machine_utils/dlib-19.21/examples/build/CMakeFiles/dnn_imagenet_train_ex.dir
+/mnt/docker/remote_machine_utils/dlib-19.21/examples/build/CMakeFiles/dnn_metric_learning_on_images_ex.dir
+/mnt/docker/remote_machine_utils/dlib-19.21/examples/build/CMakeFiles/rebuild_cache.dir
+/mnt/docker/remote_machine_utils/dlib-19.21/examples/build/CMakeFiles/edit_cache.dir
+/mnt/docker/remote_machine_utils/dlib-19.21/examples/build/dlib_build/CMakeFiles/edit_cache.dir
+/mnt/docker/remote_machine_utils/dlib-19.21/examples/build/dlib_build/CMakeFiles/rebuild_cache.dir
+/mnt/docker/remote_machine_utils/dlib-19.21/examples/build/dlib_build/CMakeFiles/dlib.dir
