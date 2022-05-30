@@ -1,0 +1,2 @@
+/data/dlib-19.21/programs/build/dlib_build/CMakeFiles/dlib.dir
+/data/dlib-19.21/programs/build/CMakeFiles/dwifit.dir

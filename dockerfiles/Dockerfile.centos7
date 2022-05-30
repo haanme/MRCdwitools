@@ -1,0 +1,29 @@
+FROM centos:7.5.1804
+
+#MAINTAINER Harri Merisaari <haanme@utu.fi>
+# C++ implemenatation for fast DWI decay curve fittings, Harri Merisaari
+
+# set up user and working directory
+ARG USER=haanme
+ENV USER="$USER"
+ARG CWD=/root
+WORKDIR $CWD
+ENV PWD="$CWD"
+
+RUN yum -y update \
+    && yum -y install epel-release wget file bzip2 openblas-devel which \
+    libmng libpng12 libSM gtk2 mesa-dri-drivers
+
+# Install anaconda
+RUN wget --quiet https://repo.anaconda.com/archive/Anaconda3-2022.05-Linux-x86_64.sh -O ~/anaconda.sh && \
+    /bin/bash ~/anaconda.sh -b -p /opt/conda && \
+    rm ~/anaconda.sh && \
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+    echo "conda activate base" >> ~/.bashrc
+
+RUN yum -y group install "Development Tools"
+RUN yum -y install make
+RUN yum -y install cmake
+RUN yum -y install nano
+
