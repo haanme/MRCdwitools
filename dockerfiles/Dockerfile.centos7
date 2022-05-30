@@ -22,8 +22,11 @@ RUN wget --quiet https://repo.anaconda.com/archive/Anaconda3-2022.05-Linux-x86_6
     echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
     echo "conda activate base" >> ~/.bashrc
 
+# Install compilation environment for use when the source codes are edited
 RUN yum -y group install "Development Tools"
 RUN yum -y install make
 RUN yum -y install cmake
 RUN yum -y install nano
+# Install the binary to the path
+COPY ./dwifit /usr/local/bin
 
