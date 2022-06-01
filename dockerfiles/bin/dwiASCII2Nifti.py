@@ -100,12 +100,8 @@ def check_exists(name,filename,files_missing):
 if __name__ == "__main__":
     # Parse input arguments into args structure
     parser = ArgumentParser()
-    parser.add_argument("--basedir", dest="basedir", help="base subject directory", required=True)
-    parser.add_argument("--ASCIIdir", dest="ASCIIdir", help="output directory", required=True)
-    parser.add_argument("--case", dest="case", help="case", default='', required=False)    
-    parser.add_argument("--op", dest="op", help="operations", default='', required=False)    
-    parser.add_argument("--model", dest="model", help="model", default='all', required=False)    
-    parser.add_argument("--prefix", dest="prefix", help="pmap prefix", default='', required=False)    
+    parser.add_argument("--DWIfile", dest="DWIfile", help="DWI Nifti file", required=True)
+    parser.add_argument("--ASCIIfile", dest="ASCIIfile", help="ASCII file with fitting results", required=True)
     args = parser.parse_args()
 
     bset = [0, 100, 300, 500, 700, 900, 1100, 1300, 1500, 1700, 1900, 2000]

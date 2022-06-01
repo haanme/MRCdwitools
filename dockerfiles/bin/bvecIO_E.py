@@ -100,7 +100,6 @@ def read_bvecs_Transpose(bvec_file_orig):
 def write_bvecs(bvec_file, bvecs):
 
     f_bvec_0 = open(bvec_file, 'w')
-    print bvecs.shape
     bvals = bvecs.shape[1]
 
     for bvec_i in range(bvals):
@@ -121,7 +120,6 @@ def write_bvecs_Transpose(bvec_file, bvecs):
     import nibabel as nib
 
     f_bvec = open(bvec_file, 'w')
-    print bvecs.shape
     bvals = bvecs.shape[0]
 
     for bvec_i in range(bvals):
