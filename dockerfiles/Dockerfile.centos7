@@ -27,6 +27,9 @@ RUN yum -y group install "Development Tools"
 RUN yum -y install make
 RUN yum -y install cmake
 RUN yum -y install nano
+RUN yum -y install bc
+RUN yum -y install sysvinit-tools
+RUN /opt/conda/bin/conda install -c conda-forge nibabel
 # Install the binary to the path
-COPY ./dwifit /usr/local/bin
-
+COPY ./bin/dwifit /usr/local/bin
+COPY ./bin/run_dwifit_for_all_ASCII.sh /usr/local/bin
