@@ -1,12 +1,17 @@
-// The contents of this file are in the public domain. See LICENSE_FOR_EXAMPLE_PROGRAMS.txt
 /*
-
-    This is an example illustrating the use the general purpose non-linear 
-    least squares optimization routines from the dlib C++ Library.
-
-    This example program will demonstrate how these routines can be used for data fitting.
-    In particular, we will generate a set of data and then use the least squares  
-    routines to infer the parameters of the model which generated the data.
+ Diffusion Weighted Imaging data fitting
+ 
+ Copyright (C) 2019-2022 Harri Merisaari haanme@MRC.fi
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <dlib/optimization.h>
@@ -543,7 +548,7 @@ void printUsage(string programname) {
 	cout << "DWI B-value fitting " << programname << endl;
 	cout << "Compilation infostring:" << getCompilationInfoString() << endl;
 	cout << endl;
-	cout << "usage: <executable>.exe <ASCII file> <model name> <[Weighted]|BFGS|LM | SIMULATION> [settings filename] [<SD> <iterations> [<param1>..<paramN>]] [No tail values]" << endl;
+	cout << "usage: <executable>.exe <ASCII file> <model name> <BFGS|LM | SIMULATION> [settings filename] [<SD> <iterations> [<param1>..<paramN>]] [No tail values]" << endl;
 	cout << endl;
 	cout << "<ASCII file>:\tfile from where SI curves are located" << endl;
 	cout << endl;
@@ -561,8 +566,6 @@ void printUsage(string programname) {
 	cout << "\tLinNonGaussianIVIM" << endl;
 	cout << "\tSLinNonGaussianIVIM" << endl;
 	cout << "\tLogInitBiexp - Asymptotic and log-linear slope for initialization of f and Df" << endl;
-	cout << endl;
-	cout << "Weighted: use constant weightings for b-values' LSQ value in fittings. Use as prefix, e. g. 'WeightedLM'" << endl;
 	cout << endl;
 	cout << "BFGS|LM|SIMULATION: optimization methods" << endl;
 	cout << "\tLM: Levenberg-Marquardt algorithm" << endl;
@@ -627,36 +630,10 @@ int main(int argc,char *argv[])
 		cout << "reading " << sfilename << " for settings"<< endl;
 		config_reader cr(sfilename);
 
-		//set b-values to all curves that we are going to fit
-		cout << "resolving b-values" << endl;
-		bvalues = readKey<double>(cr, "bvalues");
-		int no_bvalues = (int)bvalues.size();
-		cout << no_bvalues << " b-values found" << endl;
-		std::vector<double> indexes;
-		indexes = bvalues;	
-
 		//resolve fitting method
 		#pragma region resolve fitting method
 		if(argc > 3) {
 			string fitmethodstr = argv[3];
-			//resolve weightings
-			if(fitmethodstr.find("Weighted") != string::npos) {
-				weighted = true;
-				if(cr.is_key_defined("weights")) {
-					weights = readKey<double>(cr, "weights");
-					cout << weights.size() << " weights found" << endl;
-					indexes = std::vector<double>(no_bvalues);			
-					cout << "indexes=[";
-					for(unsigned int i = 0; i < indexes.size(); i++) {
-						indexes[i] = i;
-						cout << i << " ";
-					}
-					cout << "]" << endl;
-				} else {
-					weighted = false;
-					std::fill(weights.begin(), weights.end(), 1.0);
-				}
-			}
 			//resolve fitting method
             //Leveberg-Marquard, normalized data
 			if(fitmethodstr.find("LM_NORMALIZED") != string::npos) {
@@ -674,12 +651,11 @@ int main(int argc,char *argv[])
 				fitting_method = OP_SIMULATION;
 			}
 		}
-		if(weighted && (int)weights.size() != no_bvalues) {
-			cout << "weights array length " << (int)SIdata.size() << " in settings";
-			cout << " is not consistent with b-value array length " << no_bvalues << " in settings" << endl;
-			return 1;
-		}
 		#pragma endregion
+        
+        //set b-values to all curves that we are going to fit
+        int no_bvalues = 0;
+        std::vector<double> indexes;
 
 		//read signal intensity data
 		#pragma region read signal intensity data
@@ -693,6 +669,13 @@ int main(int argc,char *argv[])
 				cout << "unknown exception while reading SI file";
 				return 1;
 			}
+            cout << (int)info.bset.size() << " b-values found" << endl;
+            for(int b_i = 0; b_i < (int)info.bset.size(); b_i++) {
+                indexes.push_back(info.bset[b_i]);
+                bvalues.push_back(info.bset[b_i]);
+            }
+            no_bvalues = (int)bvalues.size();
+            cout << no_bvalues << " b-values found" << endl;
 			cout << (int)SIdata.size() << " SI curves found" << endl;
 			if((int)SIdata.size() == 0) {
 				cout << (int)SIdata.size() << " data was not found for processing" << endl;			
@@ -708,10 +691,7 @@ int main(int argc,char *argv[])
 				cout << " is not consistent with b-value array length " << no_bvalues << " in settings" << endl;			
 				return 1;
 			}
-			for(int b_i = 0; b_i < no_bvalues; b_i++) {
-				indexes[b_i] = info.bset[b_i];
-				bvalues[b_i] = info.bset[b_i];
-			}
+
 		//place default information to info
 		} else {
 			info.subwindow.push_back(0);
@@ -734,6 +714,11 @@ int main(int argc,char *argv[])
 			simulation_info.ROIName = "simulation";
 			simulation_info.modelName = "Simulation";
 		}
+        if(weighted && (int)weights.size() != no_bvalues) {
+            cout << "weights array length " << (int)SIdata.size() << " in settings";
+            cout << " is not consistent with b-value array length " << no_bvalues << " in settings" << endl;
+            return 1;
+        }
 		#pragma endregion
 		
 		std::vector<std::vector<double> > limits;
