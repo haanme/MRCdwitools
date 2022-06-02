@@ -1,5 +1,26 @@
 #!/usr/bin/env python
 
+#
+# Radiomics for Medical Imaging - Nifti to ASCII conversion.
+#
+# Copyright (C) 2019-2022 Harri Merisaari haanme@utu.fi
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#  Created by Harri Merisaari on 2.6.2022.
+#
+
 # Directory where result data are located
 experiment_dir = ''
 subjectname = ''
@@ -128,7 +149,7 @@ if __name__ == "__main__":
     files_missing = check_exists('DWI file', DWIfile, files_missing)
     files_missing = check_exists('bval file', bvalfile, files_missing)
     if files_missing > 0:
-        sys.exit(0)
+        sys.exit(1)
     
     # Create mask file if it does not exist
     subwindow = []

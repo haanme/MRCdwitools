@@ -4,7 +4,7 @@
 # Radiomics for Medical Imaging - script for running fitting to all 
 # text files with 'ASCII'-files in the current directory.
 #
-# Copyright (C) 2019-2022 Harri Merisaari haanme@MRC.fi
+# Copyright (C) 2019-2022 Harri Merisaari haanme@utu.fi
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
