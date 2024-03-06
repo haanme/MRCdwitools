@@ -59,3 +59,7 @@ COPY ./bin/dwiASCII2Nifti.sh /usr/local/bin
 COPY ./bin/dwiNifti2ASCII.py /usr/local/bin
 COPY ./bin/dwiNifti2ASCII.sh /usr/local/bin
 COPY ./bin/run_dwifit_for_all_ASCII.sh /usr/local/bin
+COPY ./settings.ini /root/settings.ini
+
+ENV PATH="/opt/conda/bin:$PATH"
+

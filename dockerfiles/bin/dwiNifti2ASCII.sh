@@ -3,7 +3,7 @@
 #
 # Radiomics for Medical Imaging - Nifti to ASCII conversion.
 #
-# Copyright (C) 2019-2022 Harri Merisaari haanme@utu.fi
+# Copyright (C) 2019-2024 Harri Merisaari haanme@utu.fi
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +24,8 @@
 dwi=$1
 mask=$2
 th=$3
+bvalfile=$4
+bvalsel=$5
 if [[ -z "$dwi" ]]
 then
     echo "DWI Nifti filename was not given"
@@ -34,7 +36,12 @@ then
 fi
 if [[ -z "$th" ]]
 then
-    python /usr/local/bin/dwiNifti2ASCII.py --DWIfile $dwi --maskfile $mask
-else
-    python /usr/local/bin/dwiNifti2ASCII.py --DWIfile $dwi --maskfile $mask --th $th
+    echo "th was not given"
 fi
+if [[ -z "$bvalfile" ]]
+then
+    echo "bvalfile was not given"
+fi
+echo /opt/conda/bin/python /usr/local/bin/dwiNifti2ASCII.py --DWIfile $dwi --maskfile $mask --th $th --bvalfile $bvalfile --bvalselection=$bvalsel
+/opt/conda/bin/python /usr/local/bin/dwiNifti2ASCII.py --DWIfile $dwi --centercrop $3 --bvalfile $bvalfile --bvalselection=$bvalsel
+

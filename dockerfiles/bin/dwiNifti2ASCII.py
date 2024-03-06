@@ -89,7 +89,7 @@ def load_nifti(name, filename):
     return data, affine, voxelsize
 
 
-def NIFTI2ASCII_MASK(DWIfile, maskfile, bvalfile, subwindow):
+def NIFTI2ASCII_MASK(DWIfile, maskfile, bvalfile, subwindow, bvalselection):
 
     outfile = os.path.splitext(DWIfile)[0] + '_ASCII.txt'
     
@@ -99,7 +99,14 @@ def NIFTI2ASCII_MASK(DWIfile, maskfile, bvalfile, subwindow):
         return 'ERROR: DWI does not have 4th dimension'
     tdim = data.shape[3]
     if not tdim == len(bvals):
-        return 'ERROR: DWI b-values ' + str(tdim) + ' while requested b-values were ' + str(len(bset))
+        return 'ERROR: DWI b-values ' + str(tdim) + ' while expected b-values based on b-value file were ' + str(len(bvals))
+    if len(bvalselection) > 0:
+        tdim = len(bvalselection)
+        bvals_selected = []
+        for bval_i in range(len(bvalselection)):
+            bvals_selected.append(bvals[bvalselection[bval_i]])
+        bvals = bvals_selected
+    print('Selected b-values [' + str(len(bvals)) + ']:', str(bvals))
 
     mdata, maffine, mvoxelsize = load_nifti('mask file', maskfile)
 
@@ -114,7 +121,10 @@ def NIFTI2ASCII_MASK(DWIfile, maskfile, bvalfile, subwindow):
 
     SIs = np.zeros([len(mdata[mdata>0]), tdim])
     for t in range(tdim):
-        vol = data[:, :, :, t]
+        if len(bvalselection) > 0:
+            vol = data[:, :, :, bvalselection[t]]
+        else:
+            vol = data[:, :, :, t]
         SIs[:, t] = vol[mdata>0]
 
     data = { 'subwindow': subwindow, 'ROI_No': ROI_No, 'bset': bvals, 'ROIslice': ROIslice, 'name': name, 'SIs': SIs, 'number': 0 }
@@ -137,12 +147,19 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--DWIfile", dest="DWIfile", help="DWI Nifti file", required=True)
     parser.add_argument("--maskfile", dest="maskfile", help="Nifti mask file", required=False, default='')
-    parser.add_argument("--th", dest="th", help="Threshold value to create Nifti mask file", required=False, default='100')
+    parser.add_argument("--centercrop", dest="centercrop", help="Crop center NxN region, default [-1 no crop]", required=False, default='-1')
+    parser.add_argument("--th", dest="th", help="Threshold value to create Nifti mask file, only if centercrop not given", required=False, default='100')
     parser.add_argument("--bvalfile", dest="bvalfile", help="ASCII file with b-values in one line space separated", required=True)
+    parser.add_argument("--bvalselection", dest="bvalselection", help="0-based indexes of selected b-values in format [i1,i2,..,iN], default [empty]=all", required=False, default='')
     args = parser.parse_args()
     DWIfile = args.DWIfile
     maskfile = args.maskfile
     bvalfile = args.bvalfile
+    centercrop = int(float(args.centercrop))
+    if len(args.bvalselection) == 0:
+        bvalselection = []
+    else:
+        bvalselection = [int(x) for x in args.bvalselection.replace(']','').replace('[','').split(',')]
     th = int(float(args.th))
 
     files_missing = 0
@@ -156,9 +173,20 @@ if __name__ == "__main__":
     files_missing = 0
     files_missing = check_exists('Mask file', maskfile, files_missing)
     if files_missing > 0:
-        print('Mask not found, using threshold ' + str(th) + ' for b0 (1st index)')
         data, affine, voxelsize = load_nifti('DWI file', DWIfile)
-        x_lo, x_hi, y_lo, y_hi, z_lo, z_hi = find_cropping(data[:, :, :, 0], th)
+        if centercrop == -1:
+            print('Mask not found, using threshold ' + str(th) + ' for b0 (1st index)')
+            x_lo, x_hi, y_lo, y_hi, z_lo, z_hi = find_cropping(data[:, :, :, 0], th)
+        else:
+            print('Mask not found, using center crop ' + str(centercrop))
+            center_x = int(np.floor(data.shape[0] / 2))
+            center_y = int(np.floor(data.shape[1] / 2))
+            x_lo = center_x - int(np.floor(centercrop / 2))
+            y_lo = center_x - int(np.floor(centercrop / 2))
+            z_lo = 0
+            x_hi = x_lo + centercrop
+            y_hi = y_lo + centercrop
+            z_hi = z_lo + data.shape[2]
         print('Using cropping ' + str((x_lo, x_hi, y_lo, y_hi, z_lo, z_hi)))
         mask = np.zeros([data.shape[0], data.shape[1], data.shape[2]])
         subwindow = [x_lo, x_hi, y_lo, y_hi, z_lo, z_hi]
@@ -168,7 +196,7 @@ if __name__ == "__main__":
         print(np.amax(mask))
         img = nib.Nifti1Image(mask, affine)
         maskfile = os.path.splitext(DWIfile)[0] + '_mask.nii.gz'
-        print('Saving ' + maskfile)
+        print('Saving mask ' + maskfile)
         nib.save(img, maskfile)
     
-    NIFTI2ASCII_MASK(DWIfile, maskfile, bvalfile, subwindow)
+    NIFTI2ASCII_MASK(DWIfile, maskfile, bvalfile, subwindow, bvalselection)

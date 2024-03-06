@@ -23,8 +23,7 @@
 
 dwi=$1
 mask=$2
-bval=$3
-th=$3
+ascii=$3
 if [[ -z "$dwi" ]]
 then
     echo "DWI Nifti filename was not given"
@@ -37,9 +36,4 @@ if [[ -z "$bval" ]]
 then
     echo "B-value filename was not given"
 fi
-if [[ -z "$th" ]]
-then
-    python /usr/local/bin/dwiNifti2ASCII.py --DWIfile $dwi --maskfile $mask --bvalfile $bval
-else
-    python /usr/local/bin/dwiNifti2ASCII.py --DWIfile $dwi --maskfile $mask --bvalfile $bval --th $th
-fi
+python /usr/local/bin/dwiASCII2Nifti.py --DWIfile $dwi --maskfile $mask --ASCIIfile $ascii
