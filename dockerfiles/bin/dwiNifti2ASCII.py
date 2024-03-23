@@ -3,7 +3,7 @@
 #
 # Radiomics for Medical Imaging - Nifti to ASCII conversion.
 #
-# Copyright (C) 2019-2022 Harri Merisaari haanme@utu.fi
+# Copyright (C) 2019-2024 Harri Merisaari haanme@utu.fi
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -91,7 +91,7 @@ def load_nifti(name, filename):
 
 def NIFTI2ASCII_MASK(DWIfile, maskfile, bvalfile, subwindow, bvalselection):
 
-    outfile = os.path.splitext(DWIfile)[0] + '_ASCII.txt'
+    outfile = DWIfile.replace('.gz','').replace('.nii','') + '_ASCII.txt'
     
     data, affine, voxelsize = load_nifti('DWI file', DWIfile)
     bvals, bval_string = read_bvals(bvalfile)
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     parser.add_argument("--DWIfile", dest="DWIfile", help="DWI Nifti file", required=True)
     parser.add_argument("--maskfile", dest="maskfile", help="Nifti mask file", required=False, default='')
     parser.add_argument("--centercrop", dest="centercrop", help="Crop center NxN region, default [-1 no crop]", required=False, default='-1')
-    parser.add_argument("--th", dest="th", help="Threshold value to create Nifti mask file, only if centercrop not given", required=False, default='100')
+    parser.add_argument("--th", dest="th", help="Threshold value to create Nifti mask file, only if centercrop not given", required=False, default='-1')
     parser.add_argument("--bvalfile", dest="bvalfile", help="ASCII file with b-values in one line space separated", required=True)
     parser.add_argument("--bvalselection", dest="bvalselection", help="0-based indexes of selected b-values in format [i1,i2,..,iN], default [empty]=all", required=False, default='')
     args = parser.parse_args()
@@ -161,11 +161,18 @@ if __name__ == "__main__":
     else:
         bvalselection = [int(x) for x in args.bvalselection.replace(']','').replace('[','').split(',')]
     th = int(float(args.th))
+    print('DWIfile:' + DWIfile)
+    print('maskfile:' + maskfile)
+    print('bvalfile:' + bvalfile)
+    print('centercrop:' + str(centercrop))
+    print('bvalselection:' + str(bvalselection))
+    print('th:' + str(th))
 
     files_missing = 0
     files_missing = check_exists('DWI file', DWIfile, files_missing)
     files_missing = check_exists('bval file', bvalfile, files_missing)
     if files_missing > 0:
+        print("Files missing, exiting")
         sys.exit(1)
     
     # Create mask file if it does not exist
@@ -173,12 +180,17 @@ if __name__ == "__main__":
     files_missing = 0
     files_missing = check_exists('Mask file', maskfile, files_missing)
     if files_missing > 0:
-        data, affine, voxelsize = load_nifti('DWI file', DWIfile)
+        print('Mask file not found')
+        data, affine, voxelsize = load_nifti('DWI file for mask creation', DWIfile)
         if centercrop == -1:
-            print('Mask not found, using threshold ' + str(th) + ' for b0 (1st index)')
+            print('Using threshold')
+            if th == -1:
+                print('Threshold not found, cannot continue')
+                sys.exit(-1)
+            print('Threshold ' + str(th) + ' for b0 (1st index)')
             x_lo, x_hi, y_lo, y_hi, z_lo, z_hi = find_cropping(data[:, :, :, 0], th)
         else:
-            print('Mask not found, using center crop ' + str(centercrop))
+            print('Using center crop ' + str(centercrop))
             center_x = int(np.floor(data.shape[0] / 2))
             center_y = int(np.floor(data.shape[1] / 2))
             x_lo = center_x - int(np.floor(centercrop / 2))
@@ -199,4 +211,5 @@ if __name__ == "__main__":
         print('Saving mask ' + maskfile)
         nib.save(img, maskfile)
     
-    NIFTI2ASCII_MASK(DWIfile, maskfile, bvalfile, subwindow, bvalselection)
+    ret = NIFTI2ASCII_MASK(DWIfile, maskfile, bvalfile, subwindow, bvalselection)
+    print(ret)
